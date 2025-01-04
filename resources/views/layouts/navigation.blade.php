@@ -18,6 +18,65 @@
                 </div>
             </div>
 
+            <!-- Notification Dropdown (add this before Settings Dropdown) -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 mr-4" ng-controller="NotificationController">
+                <div class="relative">
+                    <!-- Notification Button -->
+                    <button 
+                        ng-click="toggleNotifications($event)" 
+                        class="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <!-- Notification Badge -->
+                        <span 
+                            ng-if="unreadCount > 0"
+                            class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full"
+                        >
+                            [[ unreadCount ]]
+                        </span>
+                    </button>
+
+                    <!-- Notification Dropdown -->
+                    <div 
+                        ng-show="showNotifications"
+                        class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50"
+                        ng-click="$event.stopPropagation()"
+                    >
+                        <div class="py-2">
+                            <div class="flex items-center justify-between px-4 py-2 border-b dark:border-gray-700">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-200">Notifications</h3>
+                                <button 
+                                    ng-if="unreadCount > 0"
+                                    ng-click="markAllAsRead()"
+                                    class="text-xs text-blue-500 hover:text-blue-600"
+                                >
+                                    Mark all as read
+                                </button>
+                            </div>
+
+                            <!-- Notification List -->
+                            <div class="max-h-64 overflow-y-auto">
+                                <div 
+                                    ng-repeat="notification in notifications"
+                                    ng-click="markAsRead(notification)"
+                                    class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                                    ng-class="{'bg-blue-50 dark:bg-gray-700': !notification.is_read}"
+                                >
+                                    <p class="text-sm text-gray-900 dark:text-gray-200">[[ notification.message ]]</p>
+                                    <p class="text-xs text-gray-500 mt-1">[[ notification.created_at | date:'medium' ]]</p>
+                                </div>
+                                
+                                <div ng-if="notifications.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+                                    No notifications
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">

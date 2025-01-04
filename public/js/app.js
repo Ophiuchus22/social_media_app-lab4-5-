@@ -137,3 +137,64 @@ app.controller('PostController', ['$scope', '$http', function($scope, $http) {
     // Initial load of posts
     $scope.getPosts();
 }]);
+
+// Add NotificationController
+app.controller('NotificationController', ['$scope', '$http', function($scope, $http) {
+    $scope.notifications = [];
+    $scope.unreadCount = 0;
+    $scope.showNotifications = false;
+
+    // Toggle notifications dropdown
+    $scope.toggleNotifications = function(event) {
+        event.stopPropagation(); // Prevent event from bubbling up
+        $scope.showNotifications = !$scope.showNotifications;
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if ($scope.showNotifications) {
+            $scope.$apply(function() {
+                $scope.showNotifications = false;
+            });
+        }
+    });
+
+    // Fetch notifications
+    $scope.getNotifications = function() {
+        $http.get('/api/notifications').then(function(response) {
+            $scope.notifications = response.data;
+            $scope.unreadCount = $scope.notifications.filter(n => !n.is_read).length;
+        });
+    };
+
+    // Mark notification as read
+    $scope.markAsRead = function(notification) {
+        if (notification.is_read) return;
+        
+        $http.post('/api/notifications/' + notification.id + '/read').then(function() {
+            notification.is_read = true;
+            $scope.unreadCount = $scope.notifications.filter(n => !n.is_read).length;
+        });
+    };
+
+    // Mark all as read
+    $scope.markAllAsRead = function() {
+        $http.post('/api/notifications/read-all').then(function() {
+            $scope.notifications.forEach(n => n.is_read = true);
+            $scope.unreadCount = 0;
+        });
+    };
+
+    // Listen for new notifications
+    window.Echo.private('notifications.' + window.Laravel.user.id)
+        .listen('NewNotification', (e) => {
+            console.log('New notification received:', e); // Debug log
+            $scope.$apply(function() {
+                $scope.notifications.unshift(e.notification);
+                $scope.unreadCount++;
+            });
+        });
+
+    // Initial load
+    $scope.getNotifications();
+}]);

@@ -19,6 +19,8 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "angular": "^1.8.2"
+        "angular": "^1.8.2",
+        "laravel-echo": "^1.17.1",
+        "pusher-js": "^8.4.0-rc2"
     }
 }
