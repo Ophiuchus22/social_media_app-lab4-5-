@@ -1,5 +1,5 @@
 // public/js/app.js
-const app = angular.module('socialApp', []);
+var app = angular.module('socialApp', []) || angular.module('socialApp');
 
 app.config(['$interpolateProvider', function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
@@ -188,8 +188,15 @@ app.controller('NotificationController', ['$scope', '$http', function($scope, $h
     // Listen for new notifications
     window.Echo.private('notifications.' + window.Laravel.user.id)
         .listen('NewNotification', (e) => {
-            console.log('New notification received:', e); // Debug log
+            console.log('New notification received:', e);
             $scope.$apply(function() {
+                // Add notification type class for different styling if needed
+                e.notification.typeClass = {
+                    'post': 'bg-green-50 dark:bg-green-900/20',
+                    'like': 'bg-blue-50 dark:bg-blue-900/20',
+                    'comment': 'bg-purple-50 dark:bg-purple-900/20'
+                }[e.notification.type] || '';
+                
                 $scope.notifications.unshift(e.notification);
                 $scope.unreadCount++;
             });

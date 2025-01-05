@@ -58,5 +58,37 @@
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
         <script src="{{ asset('js/app.js') }}"></script>
         @stack('scripts')
+
+        <!-- Right before closing </body> tag -->
+        <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+        <script>
+            const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}'
+            });
+
+            console.log('Pusher initialized for user:', window.Laravel.user.id);
+
+            const channel = pusher.subscribe('notifications.' + window.Laravel.user.id);
+            
+            channel.bind('NewNotification', function(data) {
+                console.log('Notification received:', data);
+                var notificationScope = angular.element(document.querySelector('[ng-controller="NotificationController"]')).scope();
+                if (notificationScope) {
+                    notificationScope.$apply(function() {
+                        notificationScope.notifications.unshift(data.notification);
+                        notificationScope.unreadCount++;
+                    });
+                }
+            });
+
+            // Debug logs
+            pusher.connection.bind('connected', () => {
+                console.log('Successfully connected to Pusher');
+            });
+
+            channel.bind('pusher:subscription_succeeded', () => {
+                console.log('Successfully subscribed to channel:', channel.name);
+            });
+        </script>
     </body>
 </html>

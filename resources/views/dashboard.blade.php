@@ -1,25 +1,28 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2"></path>
+            </svg>
             {{ __('News Feed') }}
         </h2>
     </x-slot>
 
-    <div class="py-12" ng-app="socialApp" ng-controller="PostController">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen" ng-app="socialApp" ng-controller="PostController">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Post Creation Form -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <form ng-submit="createPost()">
                         <textarea 
                             ng-model="newPost.content"
-                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent shadow-sm"
                             rows="3"
                             placeholder="What's on your mind?"
                         ></textarea>
-                        <div class="mt-2 flex justify-end">
-                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                Post
+                        <div class="mt-3 flex justify-end">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-md">
+                                Share Post
                             </button>
                         </div>
                     </form>
@@ -27,8 +30,8 @@
             </div>
 
             <!-- Posts List -->
-            <div class="space-y-4">
-                <div ng-repeat="post in posts" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="space-y-6">
+                <div ng-repeat="post in posts" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
                     <div class="p-5">
                         <!-- Post Header -->
                         <div class="flex items-center justify-between mb-4">
@@ -98,26 +101,31 @@
                         </div>
 
                         <!-- Post Actions -->
-                        <div class="flex items-center space-x-4 border-t border-b border-gray-100 dark:border-gray-700 py-2 mb-4">
-                            <button 
-                                ng-click="toggleLike(post)" 
-                                class="flex items-center space-x-2 text-sm"
-                                ng-class="{'text-blue-500': post.liked, 'text-gray-500': !post.liked}"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                </svg>
-                                <span>[[ post.likes.length ]] Likes</span>
-                            </button>
-                            <button 
-                                ng-click="post.showComments = !post.showComments" 
-                                class="flex items-center space-x-2 text-sm text-gray-500"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                                <span>[[ post.comments.length ]] Comments</span>
-                            </button>
+                        <div class="flex items-center justify-between border-t border-b border-gray-100 dark:border-gray-700 py-2 mb-4">
+                            <div class="flex-1 flex justify-start pl-4">
+                                <button 
+                                    ng-click="toggleLike(post)" 
+                                    class="flex items-center space-x-2 text-sm hover:text-blue-600 transition-colors"
+                                    ng-class="{'text-blue-500': post.liked, 'text-gray-500': !post.liked}"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                    </svg>
+                                    <span>[[ post.likes.length ]] Likes</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex justify-center">
+                                <button 
+                                    ng-click="post.showComments = !post.showComments" 
+                                    class="flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span>[[ post.comments.length ]] Comments</span>
+                                </button>
+                            </div>
+                            <div class="flex-1"></div>
                         </div>
 
                         <!-- Comments Section -->
@@ -160,10 +168,10 @@
                                     <input 
                                         type="text" 
                                         ng-model="post.newComment" 
-                                        class="flex-1 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
+                                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent shadow-sm"
                                         placeholder="Write a comment..."
                                     >
-                                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors">
+                                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-md">
                                         Comment
                                     </button>
                                 </div>

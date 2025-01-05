@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 
 // Redirect root to login
 Route::get('/', function () {
@@ -38,5 +39,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     });
 });
+
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 require __DIR__.'/auth.php';

@@ -3,15 +3,13 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class NewNotification implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels;
 
     public $notification;
 
@@ -20,9 +18,14 @@ class NewNotification implements ShouldBroadcast
         $this->notification = $notification;
     }
 
+    public function broadcastAs()
+    {
+        return 'NewNotification';
+    }
+
     public function broadcastOn()
     {
-        return new PrivateChannel('notifications.' . $this->notification->user_id);
+        return new Channel('notifications.' . $this->notification->user_id);
     }
 
     public function broadcastWith()
