@@ -19,6 +19,21 @@
                         </svg>
                         {{ __('News Feed') }}
                     </x-nav-link>
+
+                    <!-- Add Messages Link with Counter -->
+                    <x-nav-link :href="route('messages')" :active="request()->routeIs('messages')" 
+                        class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors relative">
+                        <svg class="w-5 h-5 mr-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                        </svg>
+                        {{ __('Messages') }}
+                        <span 
+                            ng-if="unreadMessageCount > 0"
+                            class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full"
+                        >
+                            [[ unreadMessageCount ]]
+                        </span>
+                    </x-nav-link>
                 </div>
             </div>
 

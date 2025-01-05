@@ -6,6 +6,10 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
     $interpolateProvider.endSymbol(']]');
 }]);
 
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}]);
+
 app.controller('PostController', ['$scope', '$http', function($scope, $http) {
     $scope.posts = [];
     $scope.newPost = { content: '' };
@@ -139,7 +143,7 @@ app.controller('PostController', ['$scope', '$http', function($scope, $http) {
 }]);
 
 // Add NotificationController
-app.controller('NotificationController', ['$scope', '$http', function($scope, $http) {
+app.controller('NotificationController', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
     $scope.notifications = [];
     $scope.unreadCount = 0;
     $scope.showNotifications = false;
@@ -187,16 +191,9 @@ app.controller('NotificationController', ['$scope', '$http', function($scope, $h
 
     // Listen for new notifications
     window.Echo.private('notifications.' + window.Laravel.user.id)
-        .listen('NewNotification', (e) => {
+        .listen('.NewNotification', (e) => {
             console.log('New notification received:', e);
             $scope.$apply(function() {
-                // Add notification type class for different styling if needed
-                e.notification.typeClass = {
-                    'post': 'bg-green-50 dark:bg-green-900/20',
-                    'like': 'bg-blue-50 dark:bg-blue-900/20',
-                    'comment': 'bg-purple-50 dark:bg-purple-900/20'
-                }[e.notification.type] || '';
-                
                 $scope.notifications.unshift(e.notification);
                 $scope.unreadCount++;
             });
@@ -204,4 +201,104 @@ app.controller('NotificationController', ['$scope', '$http', function($scope, $h
 
     // Initial load
     $scope.getNotifications();
+
+    // Add auto-refresh
+    $interval(function() {
+        $scope.getNotifications();
+    }, 2000);
+}]);
+
+app.controller('MessageController', ['$scope', '$http', function($scope, $http) {
+    $scope.users = window.initialUsers;
+    $scope.filteredUsers = $scope.users;
+    $scope.selectedUser = null;
+    $scope.messages = [];
+    $scope.newMessage = '';
+    $scope.currentUser = window.Laravel.user;
+    $scope.searchQuery = '';
+
+    $scope.filterUsers = function() {
+        if (!$scope.searchQuery) {
+            $scope.filteredUsers = $scope.users;
+        } else {
+            $scope.filteredUsers = $scope.users.filter(user => 
+                user.name.toLowerCase().includes($scope.searchQuery.toLowerCase())
+            );
+        }
+    };
+
+    $scope.selectUser = function(user) {
+        $scope.selectedUser = user;
+        $scope.getMessages(user);
+        $scope.markMessagesAsRead(user);
+    };
+
+    $scope.getMessages = function(user) {
+        $http.get('/api/messages/' + user.id)
+            .then(function(response) {
+                $scope.messages = response.data;
+                setTimeout(() => {
+                    const container = document.getElementById('messages-container');
+                    if (container) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }, 0);
+            })
+            .catch(function(error) {
+                console.error('Error fetching messages:', error);
+            });
+    };
+
+    $scope.sendMessage = function() {
+        var messageInput = document.querySelector('input[ng-model="newMessage"]');
+        var messageContent = messageInput.value.trim();
+        
+        if (!messageContent || !$scope.selectedUser) return;
+
+        $http.post('/api/messages', {
+            receiver_id: $scope.selectedUser.id,
+            content: messageContent
+        })
+        .then(function(response) {
+            $scope.messages.push(response.data);
+            messageInput.value = '';
+            $scope.newMessage = '';
+            setTimeout(() => {
+                const container = document.getElementById('messages-container');
+                container.scrollTop = container.scrollHeight;
+            }, 0);
+        })
+        .catch(function(error) {
+            console.error('Error sending message:', error);
+        });
+    };
+
+    $scope.markMessagesAsRead = function(user) {
+        $http.post('/api/messages/' + user.id + '/read')
+            .catch(function(error) {
+                console.error('Error marking messages as read:', error);
+            });
+    };
+}]);
+
+app.controller('UnreadMessagesController', ['$scope', '$http', function($scope, $http) {
+    $scope.unreadMessageCount = 0;
+
+    // Get initial unread count
+    $scope.getUnreadCount = function() {
+        $http.get('/api/messages/unread-count').then(function(response) {
+            $scope.unreadMessageCount = response.data.count;
+        });
+    };
+
+    // Listen for new messages
+    window.Echo.private('messages.' + window.Laravel.user.id)
+        .listen('NewMessage', (e) => {
+            $scope.$apply(function() {
+                $scope.unreadMessageCount++;
+            });
+        });
+
+    // Initial load
+    $scope.getUnreadCount();
 }]);

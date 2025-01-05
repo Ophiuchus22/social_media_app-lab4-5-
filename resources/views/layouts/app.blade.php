@@ -13,6 +13,11 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script>
+            window.Laravel = {!! json_encode([
+                'user' => auth()->check() ? auth()->user() : null
+            ]) !!};
+        </script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -33,42 +38,26 @@
             </main>
         </div>
 
-        <!-- Add these before your other scripts -->
+        <!-- Scripts -->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
         <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.15.3/echo.iife.min.js"></script>
+        <script src="{{ asset('js/app.js') }}"></script>
+        
         <script>
-            window.Laravel = {!! json_encode([
-                'user' => auth()->user()
-            ]) !!};
-
-            window.Echo = new Echo({
-                broadcaster: 'pusher',
-                key: '{{ config('broadcasting.connections.pusher.key') }}',
+            const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
                 cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
                 encrypted: true,
+                authEndpoint: '/broadcasting/auth',
                 auth: {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 }
             });
-        </script>
-
-        <!-- Your existing scripts -->
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-        <script src="{{ asset('js/app.js') }}"></script>
-        @stack('scripts')
-
-        <!-- Right before closing </body> tag -->
-        <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-        <script>
-            const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
-                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}'
-            });
 
             console.log('Pusher initialized for user:', window.Laravel.user.id);
 
-            const channel = pusher.subscribe('notifications.' + window.Laravel.user.id);
+            const channel = pusher.subscribe('private-notifications.' + window.Laravel.user.id);
             
             channel.bind('NewNotification', function(data) {
                 console.log('Notification received:', data);
@@ -89,6 +78,11 @@
             channel.bind('pusher:subscription_succeeded', () => {
                 console.log('Successfully subscribed to channel:', channel.name);
             });
+
+            channel.bind('pusher:subscription_error', (error) => {
+                console.error('Subscription error:', error);
+            });
         </script>
+        @stack('scripts')
     </body>
 </html>
